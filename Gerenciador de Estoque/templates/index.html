@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gerenciamento de Estoque</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        .container {
+            width: 80%; /* Defina a largura desejada */
+            margin: 0 auto; /* Isso centraliza o bloco na página */
+        }
+        .bloco {
+            width: 250px;
+            height: 300px;
+            float: left;
+            margin-right: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            function atualizarEstoque() {
+                $.ajax({
+                    url: "/estoque_atualizado",
+                    type: "GET",
+                    dataType: "json",
+                    success: function(response) {
+                        $("#lista-estoque").empty();
+                        $.each(response.estoque, function(index, produto) {
+                            $("#lista-estoque").append("<li>" + produto.codigo + " - " + produto.nome + " - Quantidade: " + produto.quantidade + "</li>");
+                        });
+
+                        // Atualizar o menu suspenso de produtos
+                        atualizarDropdownProdutos(response.estoque);
+                    }
+                });
+            }
+
+            // Atualizar o estoque inicialmente ao carregar a página
+            atualizarEstoque();
+
+            // Atualizar o estoque a cada 5 segundos (ou o intervalo desejado)
+            setInterval(atualizarEstoque, 5000);
+
+            // Função para atualizar o menu suspenso de produtos
+            function atualizarDropdownProdutos(produtos) {
+                var dropdown = $("#produto_dropdown");
+                dropdown.empty();
+                $.each(produtos, function(index, produto) {
+                    dropdown.append("<option value='" + produto.codigo + "'>" + produto.nome + "</option>");
+                });
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center;">Gerenciamento de Estoque</h1>
+
+        <div class="bloco">
+            <h2>Novo Pedido</h2>
+            <form action="/novo_pedido" method="POST">
+                <label for="cliente_nome">Nome do Cliente:</label>
+                <input type="text" id="cliente_nome" name="cliente_nome"><br><br>
+
+                <label for="produto_codigo">Código do Produto:</label>
+                <input type="text" id="produto_codigo" name="produto_codigo"><br><br>
+
+                <label for="quantidade">Quantidade:</label>
+                <input type="number" id="quantidade" name="quantidade" min="1"><br><br>
+
+                <input type="submit" value="Enviar Pedido">
+            </form>
+        </div>
+
+        <div class="bloco">
+            <h2>Atualizar Estoque</h2>
+            <form action="/atualizar_estoque" method="POST">
+                <label for="produto_dropdown">Escolha o Produto:</label>
+                <select id="produto_dropdown" name="codigo_produto">
+                    <option value="001">Camisa</option>
+                    <option value="002">Calça</option>
+                    <!-- Adicione mais opções conforme necessário -->
+                </select><br><br>
+
+                <label for="quantidade_atualizar">Quantidade:</label>
+                <input type="number" id="quantidade_atualizar" name="quantidade_atualizar" min="1"><br><br>
+
+                <input type="submit" value="Atualizar Estoque">
+            </form>
+        </div>
+
+        <div class="bloco">
+            <h2>Adicionar Novo Produto</h2>
+            <form action="/adicionar_produto" method="POST">
+                <label for="novo_produto_codigo">Código do Novo Produto:</label>
+                <input type="text" id="novo_produto_codigo" name="novo_produto_codigo"><br><br>
+
+                <label for="novo_produto_nome">Nome do Novo Produto:</label>
+                <input type="text" id="novo_produto_nome" name="novo_produto_nome"><br><br>
+
+                <label for="novo_produto_quantidade">Quantidade do Novo Produto:</label>
+                <input type="number" id="novo_produto_quantidade" name="novo_produto_quantidade" min="1"><br><br>
+
+                <input type="submit" value="Adicionar Novo Produto">
+            </form>
+        </div>
+
+        <div class="bloco">
+            <h2>Estoque Atualizado</h2>
+            <ul id="lista-estoque">
+                <!-- Lista de estoque atualizada dinamicamente pelo JavaScript -->
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
